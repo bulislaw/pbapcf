@@ -32,6 +32,9 @@ from dbus.mainloop.glib import DBusGMainLoop
 OBEXC_IF = "org.openobex.Client"
 PBAP_IF = "org.openobex.PhonebookAccess"
 
+VCARD21 = "vcard21"
+VCARD30 = "vcard30"
+
 class PBAPcf(object):
 
     __bus = None
@@ -68,9 +71,71 @@ class PBAPcf(object):
 
         return [(unicode(x[0]), unicode(x[1])) for x in resp]
 
+    def pullAll(self):
+        resp = self.__pbap.PullAll(dbus_interface = PBAP_IF)
+        if not resp:
+            print >> sys.stderr, "Error: ", resp
+            exit(1)
+
+        return resp
+
+    def pull(self, contact):
+        resp = self.__pbap.Pull(contact, dbus_interface = PBAP_IF)
+        if not resp:
+            print >> sys.stderr, "Error: ", resp
+            exit(1)
+
+        return resp
+
+    def search(self, field, value):
+        resp = self.__pbap.Search(field, value, dbus_interface = PBAP_IF)
+        if not resp:
+            print >> sys.stderr, "Error: ", resp
+            exit(1)
+
+        return [(unicode(x[0]), unicode(x[1])) for x in resp]
+
+    def getSize(self):
+        resp = self.__pbap.GetSize(dbus_interface = PBAP_IF)
+        if not resp:
+            print >> sys.stderr, "Error: ", resp
+            exit(1)
+
+        return resp
+
+    def setFormat(self, version):
+        resp = self.__pbap.SetFormat(version, dbus_interface = PBAP_IF)
+
+    def setFilter(self, filters):
+        resp = self.__pbap.SetFilter(filters, dbus_interface = PBAP_IF)
+
+    def getFilter(self):
+        resp = self.__pbap.GetFilter(dbus_interface = PBAP_IF)
+        if not resp:
+            print >> sys.stderr, "Error: ", resp
+            exit(1)
+
+        return resp
+
+    def listFilterFields(self):
+        resp = self.__pbap.ListFilterFields(dbus_interface = PBAP_IF)
+        if not resp:
+            print >> sys.stderr, "Error: ", resp
+            exit(1)
+
+        return resp
+
+    def setOrder(self, order):
+        """'indexed', 'alphanumeric', 'phonetic'"""
+
+        resp = self.__pbap.SetOrder(order, dbus_interface = PBAP_IF)
+
 if __name__ == "__main__":
     con = PBAPcf("00:22:A5:2E:1B:41")
     print con.select("INT", "pb")
-    print con.list()
+    con.setFilter(['TEL',])
+    print con.getFilter()
+    con.setOrder("indexed")
+    print con.pullAll()
     con.close()
 
